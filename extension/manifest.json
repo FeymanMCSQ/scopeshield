@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "ScopeShield (Dev)",
+  "version": "0.0.1",
+  "description": "Turn chat scope creep into priced change tickets.",
+  "action": {
+    "default_title": "ScopeShield",
+    "default_popup": "popup.html"
+  },
+  "permissions": [],
+  "host_permissions": []
+}
