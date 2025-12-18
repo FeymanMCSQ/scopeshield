@@ -1,117 +1,6 @@
-// // extension/content.js
-
-// (() => {
-//   const BTN_ID = 'scopeshield-btn';
-
-//   function ensureButton() {
-//     let btn = document.getElementById(BTN_ID);
-//     if (btn) return btn;
-
-//     btn = document.createElement('button');
-//     btn.id = BTN_ID;
-//     btn.type = 'button';
-//     btn.innerHTML = `<span id="scopeshield-pill"></span><span>Shield</span>`;
-//     document.documentElement.appendChild(btn);
-
-//     btn.addEventListener('mousedown', (e) => {
-//       // prevent selection collapse before click registers
-//       e.preventDefault();
-//     });
-
-//     btn.addEventListener('click', async () => {
-//       const text = getSelectedText();
-//       console.log('[ScopeShield] Selected text:', text);
-
-//       // Later: extract message metadata + open ticket UI
-//       hideButton();
-//     });
-
-//     return btn;
-//   }
-
-//   function getSelectedText() {
-//     const sel = window.getSelection?.();
-//     if (!sel || sel.rangeCount === 0) return '';
-//     return sel.toString().trim();
-//   }
-
-//   function getSelectionRect() {
-//     const sel = window.getSelection?.();
-//     if (!sel || sel.rangeCount === 0) return null;
-
-//     const range = sel.getRangeAt(0);
-//     // Sometimes range.getBoundingClientRect is empty; fallback to client rects.
-//     const rect = range.getBoundingClientRect();
-//     if (rect && rect.width && rect.height) return rect;
-
-//     const rects = range.getClientRects();
-//     if (rects && rects.length) return rects[0];
-//     return null;
-//   }
-
-//   function showButtonNearSelection() {
-//     const text = getSelectedText();
-//     if (!text) return hideButton();
-
-//     const rect = getSelectionRect();
-//     if (!rect) return hideButton();
-
-//     const btn = ensureButton();
-
-//     // place slightly above/right of selection, clamp to viewport
-//     const padding = 10;
-//     const x = Math.min(
-//       window.innerWidth - 120,
-//       Math.max(padding, rect.right + 8)
-//     );
-//     const y = Math.max(padding, rect.top - 44);
-
-//     btn.style.left = `${x}px`;
-//     btn.style.top = `${y}px`;
-//     btn.style.display = 'flex';
-//   }
-
-//   function hideButton() {
-//     const btn = document.getElementById(BTN_ID);
-//     if (btn) btn.style.display = 'none';
-//   }
-
-//   // Only activate on WhatsApp/Slack to avoid accidental leakage
-//   const host = location.host;
-//   const supported = host === 'web.whatsapp.com' || host.endsWith('.slack.com');
-
-//   if (!supported) return;
-
-//   // Event wiring
-//   document.addEventListener('mouseup', () => {
-//     // defer so selection is finalized
-//     setTimeout(showButtonNearSelection, 0);
-//   });
-
-//   document.addEventListener('keyup', (e) => {
-//     // selection via keyboard
-//     if (e.key === 'Shift' || e.key.startsWith('Arrow') || e.key === 'a') {
-//       setTimeout(showButtonNearSelection, 0);
-//     }
-//     // ESC hides
-//     if (e.key === 'Escape') hideButton();
-//   });
-
-//   // Click elsewhere hides
-//   document.addEventListener('mousedown', (e) => {
-//     const btn = document.getElementById(BTN_ID);
-//     if (btn && e.target !== btn && !btn.contains(e.target)) {
-//       // don’t instantly hide if user is selecting
-//       setTimeout(() => {
-//         if (!getSelectedText()) hideButton();
-//       }, 0);
-//     }
-//   });
-
-//   console.log('[ScopeShield] content script loaded:', location.href);
-// })();
-
 // extension/content.js
+import { captureMessageFromNode } from './messageCapture';
+import { storeCapturedMessage } from './messageStore';
 
 (() => {
   const BTN_ID = 'scopeshield-btn';
@@ -146,7 +35,18 @@
 
     btn.addEventListener('click', async () => {
       const text = getSelectedText();
-      console.log('[ScopeShield] Selected text:', text);
+      if (!text) return;
+
+      const message = captureMessageFromNode({
+        text,
+        sender: 'Mock Sender', // placeholder
+        timestamp: '2025-01-01T10:00:00Z',
+        source: location.host.includes('slack') ? 'slack' : 'whatsapp',
+      });
+
+      storeCapturedMessage(message);
+      console.log('[ScopeShield] Captured message:', message);
+
       hideButton();
     });
 

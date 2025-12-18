@@ -1,6 +1,10 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('ss_uid')?.value;
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="max-w-xl text-center">
@@ -22,10 +26,15 @@ export default function HomePage() {
           </p>
         </div>
 
+        {/* Optional: show it temporarily to verify cookie works */}
+        <p className="text-xs text-gray-500 mb-4">
+          Session: <span className="font-mono">{userId ?? 'none'}</span>
+        </p>
+
         <p className="text-sm text-gray-600">
           Contact:{' '}
           <a
-            href="mailto:yourname@email.com"
+            href="mailto:sssafiullahhh@gmail.com"
             className="text-[#14a800] underline"
           >
             sssafiullahhh@gmail.com
