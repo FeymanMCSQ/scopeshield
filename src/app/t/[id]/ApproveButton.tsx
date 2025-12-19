@@ -1,3 +1,5 @@
+// /src/app/t/[id]/ApproveButton.tsx
+
 'use client';
 
 import { useState } from 'react';
