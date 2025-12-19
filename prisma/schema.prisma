@@ -30,16 +30,20 @@ model Client {
   user      User            @relation(fields: [userId], references: [id])
 
   requests  ChangeRequest[]
+
+  @@unique([userId, name])
+
 }
 
 model ChangeRequest {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  message   String
-  price     Int      // store in smallest currency unit (e.g. cents)
-  status    String   // "pending" | "approved" | "paid" | "rejected"
+  publicId  String   @unique @default(cuid()) // <-- add this
 
+  message   String
+  price     Int
+  status    String
   assetUrl  String?
 
   userId    String

@@ -1,20 +1,25 @@
-// prisma/seed.ts
 import 'dotenv/config';
 import { PrismaClient } from '../src/generated/prisma/client';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient({
-  accelerateUrl: process.env.DATABASE_URL!, // prisma+postgres://... (your Accelerate URL)
+  accelerateUrl: process.env.DATABASE_URL!,
 });
 
 async function main() {
   const user = await prisma.user.create({ data: {} });
 
-  const client = await prisma.client.create({
-    data: { name: 'Acme Startup', userId: user.id },
+  const client = await prisma.client.upsert({
+    where: {
+      userId_name: { userId: user.id, name: 'Acme Startup' },
+    },
+    update: {},
+    create: { name: 'Acme Startup', userId: user.id },
   });
 
   await prisma.changeRequest.create({
     data: {
+      publicId: randomUUID(), // ✅ required now
       message: 'Can you make a quick logo tweak?',
       price: 5000,
       status: 'pending',
@@ -27,10 +32,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
+  .catch(console.error)
   .finally(async () => {
     await prisma.$disconnect();
   });

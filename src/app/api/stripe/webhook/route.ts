@@ -1,17 +1,16 @@
-// src/app/api/stripe/webhook/route.ts
-import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { stripe } from '../../../../lib/stripe';
+import { prisma } from '../../../../lib/prisma';
+import { headers } from 'next/headers';
 
 export async function POST(req: Request) {
   const body = await req.text();
-
-  const h = await headers(); // <-- important in your Next version
+  const h = await headers();
   const signature = h.get('stripe-signature');
 
   if (!signature) {
-    return new NextResponse('Missing Stripe signature', { status: 400 });
+    return new NextResponse('Missing signature', { status: 400 });
   }
 
   let event: Stripe.Event;
@@ -27,7 +26,17 @@ export async function POST(req: Request) {
     return new NextResponse('Invalid signature', { status: 400 });
   }
 
-  console.log('✅ Stripe event received:', event.type);
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const ticketId = session.metadata?.ticketId;
+
+    if (ticketId) {
+      await prisma.changeRequest.update({
+        where: { id: ticketId },
+        data: { status: 'paid' },
+      });
+    }
+  }
 
   return NextResponse.json({ received: true });
 }
