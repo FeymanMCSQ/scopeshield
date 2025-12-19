@@ -57,7 +57,7 @@ export default function TicketAssetUpload({
           <img
             src={assetUrl}
             alt="Ticket attachment"
-            className="w-full max-w-2xl rounded-lg border"
+            className="max-w-full max-w-2xl rounded-lg border"
           />
         </div>
       ) : (

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { put } from '@vercel/blob';
 import { prisma } from '../../../../../lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 export const runtime = 'nodejs';
 
@@ -10,9 +11,9 @@ const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ id: string }> } // ✅ important
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params; // ✅ important
+  const { id } = await params;
 
   const cookieStore = await cookies();
   const ssUid = cookieStore.get('ss_uid')?.value;
@@ -21,7 +22,7 @@ export async function POST(
   }
 
   const ticket = await prisma.changeRequest.findUnique({
-    where: { id }, // now id is real
+    where: { id },
     select: { id: true, userId: true },
   });
 
@@ -51,16 +52,25 @@ export async function POST(
     return NextResponse.json({ error: 'File too large' }, { status: 413 });
   }
 
-  const blob = await put(`tickets/${ticket.id}/asset`, file, {
+
+  const ext = file.name.split('.').pop();
+  const filename = `asset-${Date.now()}.${ext}`;
+
+  const blob = await put(`tickets/${ticket.id}/${filename}`, file, {
     access: 'public',
     contentType: file.type,
     addRandomSuffix: false,
+    allowOverwrite: true, // ✅ allow replacing the single asset per ticket
   });
+
+  console.log('[DEBUG] Uploaded blob URL:', blob.url);
 
   await prisma.changeRequest.update({
     where: { id: ticket.id },
     data: { assetUrl: blob.url },
   });
+
+  revalidatePath(`/t/${ticket.id}`);
 
   return NextResponse.json({ assetUrl: blob.url });
 }

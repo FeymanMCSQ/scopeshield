@@ -101,12 +101,12 @@ export default async function TicketPage({
       <p className="text-sm text-gray-500 mt-2">Status: {ticket.status}</p>
 
       {/* Asset render always; upload only for owner */}
-      {ticket.assetUrl ? (
+      {ticket.assetUrl && !isOwner ? (
         <div className="mt-6">
           <img
             src={ticket.assetUrl}
             alt="Ticket attachment"
-            className="w-full rounded-lg border"
+            className="max-w-full rounded-lg border"
           />
         </div>
       ) : null}
