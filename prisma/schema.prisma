@@ -52,3 +52,16 @@ model ChangeRequest {
   user      User     @relation(fields: [userId], references: [id])
   client    Client   @relation(fields: [clientId], references: [id])
 }
+
+model TicketPin {
+  id        String   @id @default(cuid())
+  ticketId  String
+  x         Float    // normalized [0..1]
+  y         Float    // normalized [0..1]
+  note      String?  // optional text
+  createdAt DateTime @default(now())
+
+  ticket ChangeRequest @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
