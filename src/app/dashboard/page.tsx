@@ -1,5 +1,7 @@
 // src/app/dashboard/page.tsx
 import { cookies } from 'next/headers';
+import PaymentToast from './PaymentToast';
+import RevenueTrendChart from './RevenueTrendChart';
 
 type Ticket = {
   id: string;
@@ -41,6 +43,9 @@ export default async function DashboardPage() {
 
   return (
     <main className="p-8 max-w-5xl mx-auto">
+      <PaymentToast />
+      <RevenueTrendChart />
+
       <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
 
       {/* Filters (UI shell only) */}

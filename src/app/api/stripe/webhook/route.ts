@@ -16,11 +16,13 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
+    console.log('Webhook received. Signature:', signature);
     event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
+    console.log('Signature verified. Event:', event.type);
   } catch (err) {
     console.error('Webhook signature verification failed.', err);
     return new NextResponse('Invalid signature', { status: 400 });
@@ -30,11 +32,14 @@ export async function POST(req: Request) {
     const session = event.data.object as Stripe.Checkout.Session;
     const ticketId = session.metadata?.ticketId;
 
+    console.log('Payment completed for ticket:', ticketId);
+
     if (ticketId) {
       await prisma.changeRequest.update({
         where: { id: ticketId },
         data: { status: 'paid' },
       });
+      console.log('Ticket status updated to paid');
     }
   }
 
