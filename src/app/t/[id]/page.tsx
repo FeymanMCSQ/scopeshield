@@ -96,6 +96,7 @@ import TicketAssetUpload from './TicketAssetUpload';
 import TicketPinsOverlay from './TicketPinsOverlay';
 import { TicketEmbedPreview } from './TicketEmbedPreview';
 import { cookies } from 'next/headers';
+import PaymentToast from '../../../components/PaymentToast';
 
 // Optional but helpful during dev (prevents stale embeds/assets)
 export const dynamic = 'force-dynamic';
@@ -148,6 +149,7 @@ export default async function TicketPage({
 
   return (
     <main className="mx-auto max-w-2xl p-8">
+      <PaymentToast />
       <h1 className="text-2xl font-semibold mb-2">Change Request</h1>
 
       <p className="text-gray-600 mb-6">Client: {ticket.client.name}</p>

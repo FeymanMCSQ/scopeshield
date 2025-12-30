@@ -1,6 +1,6 @@
 // src/app/dashboard/page.tsx
 import { cookies } from 'next/headers';
-import PaymentToast from './PaymentToast';
+import PaymentToast from '../../components/PaymentToast';
 import RevenueTrendChart from './RevenueTrendChart';
 
 type Ticket = {
