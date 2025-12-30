@@ -21,7 +21,7 @@ export default function PaymentToast() {
     });
 
     // auto-dismiss after 3s
-    const t = window.setTimeout(() => setDismissed(true), 3000);
+    const t = window.setTimeout(() => setDismissed(true), 300000);
     return () => window.clearTimeout(t);
   }, [paid, router]);
 
