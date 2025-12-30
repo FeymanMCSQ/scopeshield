@@ -51,6 +51,8 @@ model ChangeRequest {
 
   user      User     @relation(fields: [userId], references: [id])
   client    Client   @relation(fields: [clientId], references: [id])
+
+  ticketPins TicketPin[]
 }
 
 model TicketPin {
