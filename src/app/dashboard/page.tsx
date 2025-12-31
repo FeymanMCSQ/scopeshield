@@ -2,6 +2,7 @@
 import { cookies } from 'next/headers';
 import PaymentToast from '../../components/PaymentToast';
 import RevenueTrendChart from './RevenueTrendChart';
+import ExtensionPairing from './ExtensionPairing';
 
 type Ticket = {
   id: string;
@@ -24,6 +25,7 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage() {
   // cookies() is async in your setup
   const cookieStore = await cookies();
+  const ss_uid = cookieStore.get('ss_uid')?.value;
 
   const cookieHeader = cookieStore
     .getAll()
@@ -43,6 +45,8 @@ export default async function DashboardPage() {
 
   return (
     <main className="p-8 max-w-5xl mx-auto">
+      <ExtensionPairing ss_uid={ss_uid} />
+
       <PaymentToast />
       <RevenueTrendChart />
 

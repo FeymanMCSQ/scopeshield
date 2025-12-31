@@ -101,6 +101,30 @@
       const btn = document.getElementById(BTN_ID);
       if (btn) btn.style.display = "none";
     }
+    const ORIGIN_ALLOWLIST = /* @__PURE__ */ new Set([
+      "http://localhost:3000",
+      "https://scopeshield.vercel.app"
+    ]);
+    function isSSAuthMessage(x) {
+      if (!x || typeof x !== "object") return false;
+      const obj = x;
+      return obj.type === "SS_AUTH" && typeof obj.ss_uid === "string" && obj.ss_uid.length > 0;
+    }
+    window.addEventListener("message", (event) => {
+      if (!ORIGIN_ALLOWLIST.has(event.origin)) return;
+      if (!isSSAuthMessage(event.data)) return;
+      chrome.runtime.sendMessage(
+        { type: "SS_AUTH_STORE", payload: { ss_uid: event.data.ss_uid } },
+        (res) => {
+          const err = chrome.runtime.lastError;
+          if (err) {
+            console.warn("[ScopeShield] SS_AUTH_STORE failed:", err.message);
+            return;
+          }
+          console.log("[ScopeShield] SS_AUTH_STORE ack:", res);
+        }
+      );
+    });
     const host = location.host;
     const supported = host === "web.whatsapp.com" || host === "app.slack.com" || host.endsWith(".slack.com");
     if (!supported) return;

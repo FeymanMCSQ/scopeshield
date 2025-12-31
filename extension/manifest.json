@@ -21,6 +21,14 @@
       "js": ["content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://localhost:3000/*",
+        "https://scopeshield.vercel.app/*"
+      ],
+      "js": ["pairing.js"],
+      "run_at": "document_idle"
     }
   ]
 }

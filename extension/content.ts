@@ -133,6 +133,46 @@ type MousePoint = { x: number; y: number };
     if (btn) btn.style.display = 'none';
   }
 
+  const ORIGIN_ALLOWLIST = new Set([
+    'http://localhost:3000',
+    'https://scopeshield.vercel.app',
+  ]);
+
+  type SSAuthMessage = {
+    type: 'SS_AUTH';
+    ss_uid: string;
+  };
+
+  function isSSAuthMessage(x: unknown): x is SSAuthMessage {
+    if (!x || typeof x !== 'object') return false;
+    const obj = x as Record<string, unknown>;
+    return (
+      obj.type === 'SS_AUTH' &&
+      typeof obj.ss_uid === 'string' &&
+      obj.ss_uid.length > 0
+    );
+  }
+
+  // Listen for pairing from the web app (dashboard)
+  window.addEventListener('message', (event: MessageEvent) => {
+    // Security: only accept from our own origins
+    if (!ORIGIN_ALLOWLIST.has(event.origin)) return;
+
+    if (!isSSAuthMessage(event.data)) return;
+
+    chrome.runtime.sendMessage(
+      { type: 'SS_AUTH_STORE', payload: { ss_uid: event.data.ss_uid } },
+      (res: unknown) => {
+        const err = chrome.runtime.lastError;
+        if (err) {
+          console.warn('[ScopeShield] SS_AUTH_STORE failed:', err.message);
+          return;
+        }
+        console.log('[ScopeShield] SS_AUTH_STORE ack:', res);
+      }
+    );
+  });
+
   // Only activate on WhatsApp/Slack to avoid accidental leakage
   const host = location.host;
   const supported =
