@@ -101,7 +101,6 @@ export async function POST(req: Request) {
   });
 
   const origin =
-    req.headers.get('origin') ??
     process.env.NEXT_PUBLIC_APP_URL ??
     'http://localhost:3000';
 
