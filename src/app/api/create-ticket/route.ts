@@ -1,89 +1,4 @@
-// import { NextResponse } from 'next/server';
-// import { prisma } from '../../../lib/prisma';
-// import { cookies } from 'next/headers';
-
-// export const dynamic = 'force-dynamic';
-// export const revalidate = 0;
-
-// type Body = {
-//   clientName?: string;
-//   clientId?: string;
-//   message: string;
-//   priceDollars: number;
-// };
-
-// export async function POST(req: Request) {
-//   const body = (await req.json()) as Partial<Body>;
-
-//   const message = typeof body.message === 'string' ? body.message.trim() : '';
-//   if (!message) {
-//     return NextResponse.json({ error: 'message required' }, { status: 400 });
-//   }
-
-//   const priceDollars = body.priceDollars;
-//   if (typeof priceDollars !== 'number' || Number.isNaN(priceDollars)) {
-//     return NextResponse.json(
-//       { error: 'priceDollars must be a number' },
-//       { status: 400 }
-//     );
-//   }
-
-//   const store = await cookies();
-//   const ssUid = store.get('ss_uid')?.value;
-//   if (!ssUid) {
-//     return NextResponse.json({ error: 'missing session' }, { status: 401 });
-//   }
-
-//   // Ensure a DB User exists for this session id
-//   const user = await prisma.user.upsert({
-//     where: { id: ssUid },
-//     update: {},
-//     create: { id: ssUid },
-//     select: { id: true },
-//   });
-
-//   // Resolve client
-//   let clientId = typeof body.clientId === 'string' ? body.clientId : undefined;
-
-//   if (!clientId) {
-//     const name =
-//       typeof body.clientName === 'string' && body.clientName.trim()
-//         ? body.clientName.trim()
-//         : 'Default Client';
-
-//     const client = await prisma.client.create({
-//       data: { name, userId: user.id },
-//       select: { id: true },
-//     });
-
-//     clientId = client.id;
-//   }
-
-//   const priceCents = Math.max(0, Math.round(priceDollars * 100));
-
-//   const cr = await prisma.changeRequest.create({
-//     data: {
-//       message,
-//       price: priceCents,
-//       status: 'pending',
-//       userId: user.id,
-//       clientId,
-//     },
-//     select: { id: true },
-//   });
-
-//   const origin =
-//     req.headers.get('origin') ??
-//     process.env.NEXT_PUBLIC_APP_URL ??
-//     'http://localhost:3000';
-
-//   const url = `${origin}/t/${cr.id}`;
-
-//   return NextResponse.json(
-//     { ticketId: cr.id, url },
-//     { headers: { 'Cache-Control': 'no-store' } }
-//   );
-// }
+//src/app/api/create-ticket/route.ts
 
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
@@ -116,9 +31,19 @@ export async function POST(req: Request) {
   }
 
   const store = await cookies();
-  const ssUid = store.get('ss_uid')?.value;
+  const cookieUid = store.get('ss_uid')?.value;
+
+  // Extension support: allow header-based identity if cookie is missing
+  const headerUid = req.headers.get('x-ss-uid')?.trim();
+
+  const ssUid = cookieUid || headerUid;
+
   if (!ssUid) {
     return NextResponse.json({ error: 'missing session' }, { status: 401 });
+  }
+
+  if (ssUid.length > 200) {
+    return NextResponse.json({ error: 'invalid session' }, { status: 401 });
   }
 
   // Ensure a DB User exists for this session id
