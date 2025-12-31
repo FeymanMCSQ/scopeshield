@@ -1,3 +1,4 @@
+// extension/popup.js
 const hourlyRateInput = document.getElementById('hourlyRate');
 const defaultFeeInput = document.getElementById('defaultFee');
 const saveBtn = document.getElementById('save');

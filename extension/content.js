@@ -47,6 +47,20 @@ import { storeCapturedMessage } from './messageStore';
       storeCapturedMessage(message);
       console.log('[ScopeShield] Captured message:', message);
 
+      // Send to background (service worker)
+      chrome.runtime.sendMessage(
+        { type: 'CAPTURED_MESSAGE', payload: message },
+        (res) => {
+          // if background is asleep/invalid, Chrome sets runtime.lastError
+          const err = chrome.runtime.lastError;
+          if (err) {
+            console.warn('[ScopeShield] sendMessage failed:', err.message);
+            return;
+          }
+          console.log('[ScopeShield] background ack:', res);
+        }
+      );
+
       hideButton();
     });
 
