@@ -125,6 +125,16 @@
         }
       );
     });
+
+    // Listen for messages from Background Script
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      if (msg.type === "EXPAND_TEMPLATE") {
+        console.log("[ScopeShield][Content] Expanding template:", msg.payload);
+        // TODO: Implement actual text insertion logic here
+        sendResponse({ ok: true });
+        return;
+      }
+    });
     const host = location.host;
     const supported = host === "web.whatsapp.com" || host === "app.slack.com" || host.endsWith(".slack.com");
     if (!supported) return;
