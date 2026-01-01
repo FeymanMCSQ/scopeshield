@@ -1,3 +1,4 @@
+// src/app/dashboard/extensionPairing.tsx
 'use client';
 
 import { useEffect } from 'react';

@@ -1,3 +1,4 @@
+// /src/middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 const COOKIE_NAME = 'ss_uid';

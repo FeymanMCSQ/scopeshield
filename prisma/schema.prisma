@@ -4,6 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -14,12 +15,21 @@ datasource db {
 }
 
 model User {
-  id        String          @id @default(cuid())
+  // NOTE: In your system, User.id is supplied from ss_uid (guest_...) via upsert.
+  // Keeping @default(cuid()) is misleading; we remove it so schema matches reality.
+  id        String          @id
   createdAt DateTime        @default(now())
+  updatedAt DateTime? @updatedAt
+
+  // Auth bridge fields (Phase 1)
+  isGuest    Boolean        @default(true)
+  email      String?
+  clerkUserId String?       @unique
 
   clients   Client[]
   requests  ChangeRequest[]
 }
+
 
 model Client {
   id        String          @id @default(cuid())
