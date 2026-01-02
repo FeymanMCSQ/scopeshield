@@ -32,7 +32,9 @@ export default async function DashboardPage() {
     .map((c) => `${c.name}=${c.value}`)
     .join('; ');
 
-  const res = await fetch('http://localhost:3000/api/dashboard', {
+  const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+
+  const res = await fetch(`${origin}/api/dashboard`, {
     headers: { Cookie: cookieHeader },
     cache: 'no-store',
   });
